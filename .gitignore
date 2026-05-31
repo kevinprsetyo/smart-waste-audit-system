@@ -4,8 +4,6 @@
 .env
 
 # Model
-*.pt
-*.pth
 
 # Python
 venv/

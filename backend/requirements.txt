@@ -1,0 +1,24 @@
+# ─────────────────────────────────────────────────────────────────
+# Smart Waste Audit System – Backend Dependencies
+# ─────────────────────────────────────────────────────────────────
+
+# Web framework
+fastapi>=0.111.0
+
+# ASGI server
+uvicorn[standard]>=0.29.0
+
+# YOLOv8 (includes torch, torchvision, opencv-python-headless, etc.)
+ultralytics>=8.2.0
+
+# Image processing
+Pillow>=10.3.0
+
+# Multipart form-data parsing (required by FastAPI for file uploads)
+python-multipart>=0.0.9
+
+# Ollama Python SDK (for Ollama Cloud AI audit reports)
+ollama>=0.2.1
+
+# .env file loading
+python-dotenv>=1.0.0

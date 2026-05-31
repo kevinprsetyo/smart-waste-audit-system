@@ -1,0 +1,24 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+
+# Uploads
+uploads/*
+
+# Model
+*.pt
+*.pth
+
+# Next.js
+frontend/.next/
+frontend/node_modules/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log

@@ -6,6 +6,30 @@ Unggah foto sampah dan sistem akan otomatis mendeteksi objek sampah, mengumpulka
 
 ---
 
+## Tampilan Aplikasi
+
+**1. Halaman Utama — Deteksi Sampah**
+
+![Halaman Utama dan Hasil Deteksi](docs/screenshots/demo-1-deteksi.png)
+
+**2. Distribusi Sampah dan Skor Daur Ulang**
+
+![Distribusi Sampah dan Skor Daur Ulang](docs/screenshots/demo-2-statistik.png)
+
+**3. Insight Utama dari AI**
+
+![Insight Utama AI Generated](docs/screenshots/demo-3-insight.png)
+
+**4. Laporan Audit AI — Ringkasan dan Rekomendasi Daur Ulang**
+
+![Laporan Audit AI](docs/screenshots/demo-4-laporan-audit.png)
+
+**5. Laporan Audit AI — Dampak Lingkungan dan Tindakan yang Disarankan**
+
+![Dampak Lingkungan dan Tindakan](docs/screenshots/demo-5-dampak-lingkungan.png)
+
+---
+
 ## Teknologi yang Digunakan
 
 | Lapisan | Teknologi |

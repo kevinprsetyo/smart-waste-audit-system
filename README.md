@@ -320,6 +320,3 @@ Pastikan variabel `OLLAMA_API_KEY` sudah diatur di pengaturan environment Vercel
 
 ---
 
-## Lisensi
-
-MIT

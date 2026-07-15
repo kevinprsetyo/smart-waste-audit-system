@@ -1,94 +1,94 @@
 # Smart Waste Audit System
 
-A full-stack AI-powered waste detection and environmental audit platform built with YOLOv8, Ollama Cloud LLM, FastAPI, and Next.js.
+Platform deteksi sampah dan audit lingkungan berbasis AI yang dibangun menggunakan YOLOv8, Ollama Cloud LLM, FastAPI, dan Next.js.
 
-Upload an image of waste and the system automatically detects waste objects, aggregates statistics, and generates a structured environmental audit report using a large language model.
+Unggah foto sampah dan sistem akan otomatis mendeteksi objek sampah, mengumpulkan statistik, serta menghasilkan laporan audit lingkungan menggunakan model bahasa besar (LLM).
 
 ---
 
-## Tech Stack
+## Teknologi yang Digunakan
 
-| Layer | Technology |
+| Lapisan | Teknologi |
 |---|---|
-| Object Detection | YOLOv8 (custom-trained `best.pt`) |
-| AI Audit Report | Ollama Cloud (`gpt-oss:120b`) |
+| Deteksi Objek | YOLOv8 (model custom `best.pt`) |
+| Laporan Audit AI | Ollama Cloud (`gpt-oss:120b`) |
 | Backend API | FastAPI + Uvicorn |
 | Frontend | Next.js 16 + TypeScript + Tailwind CSS |
-| Charts | Recharts |
+| Grafik | Recharts |
 | Deployment | Vercel (monorepo) |
 
 ---
 
-## Project Structure
+## Struktur Proyek
 
 ```
 smart-waste-audit-system/
 ├── backend/
-│   ├── main.py                  # FastAPI app — all routes and Pydantic models
+│   ├── main.py                  # Aplikasi FastAPI — semua route dan Pydantic model
 │   ├── services/
-│   │   ├── detector.py          # YOLOv8 model loader and inference runner
-│   │   ├── statistics.py        # Waste aggregation and LLM prompt builder
-│   │   └── ollama_service.py    # Ollama Cloud client (singleton)
-│   ├── uploads/                 # Temp image storage (auto-cleaned after each request)
-│   ├── .env.example             # Copy to .env and fill in your API key
+│   │   ├── detector.py          # Pemuat model YOLOv8 dan runner inferensi
+│   │   ├── statistics.py        # Agregasi sampah dan pembangun prompt LLM
+│   │   └── ollama_service.py    # Klien Ollama Cloud (singleton)
+│   ├── uploads/                 # Penyimpanan gambar sementara (dihapus otomatis setelah request)
+│   ├── .env.example             # Salin ke .env dan isi API key Anda
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── app/                 # Next.js App Router pages
-│   │   ├── components/          # UI components (upload card, charts, audit report, etc.)
-│   │   ├── lib/                 # API client utilities
-│   │   └── types/               # TypeScript type definitions
+│   │   ├── app/                 # Halaman Next.js App Router
+│   │   ├── components/          # Komponen UI (upload card, grafik, laporan audit, dll.)
+│   │   ├── lib/                 # Utilitas klien API
+│   │   └── types/               # Definisi tipe TypeScript
 │   └── package.json
 ├── model/
-│   └── best.pt                  # Custom-trained YOLOv8 model weights
-└── vercel.json                  # Vercel monorepo deployment config
+│   └── best.pt                  # Bobot model YOLOv8 yang sudah dilatih
+└── vercel.json                  # Konfigurasi deployment monorepo Vercel
 ```
 
 ---
 
-## How It Works
+## Cara Kerja
 
-The system runs a two-phase AI pipeline on every uploaded image:
+Sistem menjalankan pipeline AI dua fase pada setiap gambar yang diunggah:
 
-**Phase 1 — Detection** (`POST /api/detect`)
+**Fase 1 — Deteksi** (`POST /api/detect`)
 
-1. The uploaded image is validated (type, size) and temporarily saved.
-2. A custom-trained YOLOv8 model (`best.pt`) runs inference and returns detected waste objects with confidence scores.
-3. The temporary file is deleted immediately after inference.
+1. Gambar yang diunggah divalidasi (tipe dan ukuran file) lalu disimpan sementara.
+2. Model YOLOv8 custom (`best.pt`) menjalankan inferensi dan mengembalikan objek sampah yang terdeteksi beserta skor kepercayaannya.
+3. File sementara langsung dihapus setelah inferensi selesai.
 
-**Phase 2 — Full Audit** (`POST /api/audit`)
+**Fase 2 — Audit Penuh** (`POST /api/audit`)
 
-1. Steps 1–2 from Phase 1.
-2. Detection results are aggregated into per-class waste statistics.
-3. A structured natural-language prompt is built from the statistics.
-4. The prompt is sent to **Ollama Cloud** (`gpt-oss:120b`) which returns a full environmental audit report.
-5. Detections, statistics, and the audit report are returned as a single JSON response.
+1. Langkah 1-2 dari Fase 1.
+2. Hasil deteksi diagregasi menjadi statistik sampah per kelas.
+3. Prompt terstruktur dibuat dari statistik tersebut.
+4. Prompt dikirim ke **Ollama Cloud** (`gpt-oss:120b`) yang mengembalikan laporan audit lingkungan lengkap.
+5. Deteksi, statistik, dan laporan audit dikembalikan dalam satu respons JSON.
 
 ```
-HTTP Request (multipart image)
+Request HTTP (gambar multipart)
          |
          v
   +--------------+
-  |  Validation  |  -- MIME type, extension, file size
+  |  Validasi    |  -- Tipe MIME, ekstensi, ukuran file
   +--------------+
          |
          v
   +--------------+
-  |   YOLOv8    |  -- detector.py  (best.pt loaded once at startup)
-  |  Inference  |
+  |   YOLOv8    |  -- detector.py  (best.pt dimuat sekali saat startup)
+  |  Inferensi  |
   +--------------+
          |  detections: [{class, confidence}, ...]
          v
   +--------------+
-  |  Statistics  |  -- statistics.py  (pure aggregation)
-  | Aggregation  |
+  |  Statistik   |  -- statistics.py  (agregasi murni)
+  |  Agregasi   |
   +--------------+
-         |  statistics: {plastic: 2, can: 1}
+         |  statistics: {plastik: 2, kaleng: 1}
          v
   +--------------+
-  | Prompt Build |  -- statistics.build_audit_prompt()
+  | Buat Prompt  |  -- statistics.build_audit_prompt()
   +--------------+
-         |  structured natural-language prompt
+         |  prompt bahasa alami terstruktur
          v
   +--------------+
   | Ollama Cloud |  -- ollama_service.py  (gpt-oss:120b)
@@ -96,31 +96,31 @@ HTTP Request (multipart image)
   +--------------+
          |  audit_report: "..."
          v
-  JSON Response  {success, detections, statistics, audit_report}
+  Respons JSON  {success, detections, statistics, audit_report}
 ```
 
 ---
 
-## Prerequisites
+## Persyaratan Sistem
 
-| Tool | Minimum Version |
+| Alat | Versi Minimum |
 |---|---|
 | Python | 3.10 |
 | Node.js | 18 |
 | pip | 23+ |
-| CUDA (optional) | 11.8+ (GPU acceleration) |
-| Ollama Cloud account | https://ollama.com |
+| CUDA (opsional) | 11.8+ (akselerasi GPU) |
+| Akun Ollama Cloud | https://ollama.com |
 
 ---
 
-## Local Development
+## Instalasi dan Pengembangan Lokal
 
-### Backend Setup
+### Setup Backend
 
 ```bash
 cd backend
 
-# Create and activate virtual environment
+# Buat dan aktifkan virtual environment
 python -m venv venv
 
 # Windows
@@ -129,11 +129,11 @@ venv\Scripts\activate
 # macOS / Linux
 source venv/bin/activate
 
-# Install dependencies
+# Instal dependensi
 pip install -r requirements.txt
 ```
 
-**Configure environment variables:**
+**Konfigurasi variabel lingkungan:**
 
 ```bash
 # Windows
@@ -143,51 +143,51 @@ copy .env.example .env
 cp .env.example .env
 ```
 
-Open `.env` and set your Ollama Cloud API key:
+Buka file `.env` dan isi API key Ollama Cloud Anda:
 
 ```env
-OLLAMA_API_KEY=your_api_key_here
+OLLAMA_API_KEY=api_key_anda_di_sini
 ```
 
-Get your API key from: https://ollama.com/settings/keys
+Dapatkan API key di: https://ollama.com/settings/keys
 
-**Start the backend server:**
+**Jalankan server backend:**
 
 ```bash
 uvicorn main:app --reload
 ```
 
-The server starts at `http://127.0.0.1:8000`
+Server berjalan di `http://127.0.0.1:8000`
 
-| URL | Description |
+| URL | Keterangan |
 |---|---|
-| `http://127.0.0.1:8000/docs` | Swagger / OpenAPI interactive docs |
-| `http://127.0.0.1:8000/redoc` | ReDoc documentation |
-| `http://127.0.0.1:8000/health` | Liveness probe |
+| `http://127.0.0.1:8000/docs` | Dokumentasi interaktif Swagger / OpenAPI |
+| `http://127.0.0.1:8000/redoc` | Dokumentasi ReDoc |
+| `http://127.0.0.1:8000/health` | Pengecekan status server |
 
 ---
 
-### Frontend Setup
+### Setup Frontend
 
 ```bash
 cd frontend
 
-# Install dependencies
+# Instal dependensi
 npm install
 
-# Start development server
+# Jalankan server pengembangan
 npm run dev
 ```
 
-The frontend starts at `http://localhost:3000`
+Frontend berjalan di `http://localhost:3000`
 
 ---
 
-## API Reference
+## Referensi API
 
 ### GET /health
 
-Liveness probe — returns `200 OK` when the model is loaded and the service is ready.
+Pengecekan status server — mengembalikan `200 OK` saat model sudah dimuat dan layanan siap.
 
 ```json
 { "status": "ok", "message": "AI inference service is running." }
@@ -197,23 +197,23 @@ Liveness probe — returns `200 OK` when the model is loaded and the service is 
 
 ### POST /detect
 
-Upload an image and receive raw YOLOv8 detection results.
+Unggah gambar dan terima hasil deteksi YOLOv8 mentah.
 
 **Request**
 
 ```
 Content-Type: multipart/form-data
-Field:        file  (image — JPEG, PNG, WEBP, BMP, TIFF, max 20 MB)
+Field:        file  (gambar — JPEG, PNG, WEBP, BMP, TIFF, maks. 20 MB)
 ```
 
-**Response 200 OK**
+**Respons 200 OK**
 
 ```json
 {
   "success": true,
   "detections": [
-    { "class": "can",     "confidence": 0.93 },
-    { "class": "plastic", "confidence": 0.91 }
+    { "class": "kaleng",   "confidence": 0.93 },
+    { "class": "plastik",  "confidence": 0.91 }
   ]
 }
 ```
@@ -222,70 +222,70 @@ Field:        file  (image — JPEG, PNG, WEBP, BMP, TIFF, max 20 MB)
 
 ### POST /audit
 
-Full waste audit pipeline — detection + statistics + AI-generated report.
+Pipeline audit penuh — deteksi + statistik + laporan yang dihasilkan AI.
 
 **Request**
 
 ```
 Content-Type: multipart/form-data
-Field:        file  (image — JPEG, PNG, WEBP, BMP, TIFF, max 20 MB)
+Field:        file  (gambar — JPEG, PNG, WEBP, BMP, TIFF, maks. 20 MB)
 ```
 
-**Example curl**
+**Contoh curl**
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/audit" \
   -H "accept: application/json" \
-  -F "file=@/path/to/image.jpg"
+  -F "file=@/path/ke/gambar.jpg"
 ```
 
-**Response 200 OK**
+**Respons 200 OK**
 
 ```json
 {
   "success": true,
   "detections": [
-    { "class": "can",     "confidence": 0.93 },
-    { "class": "plastic", "confidence": 0.91 },
-    { "class": "plastic", "confidence": 0.88 }
+    { "class": "kaleng",  "confidence": 0.93 },
+    { "class": "plastik", "confidence": 0.91 },
+    { "class": "plastik", "confidence": 0.88 }
   ],
   "statistics": {
-    "plastic": 2,
-    "can": 1
+    "plastik": 2,
+    "kaleng": 1
   },
-  "audit_report": "## Waste Audit Report\n\n**1. Waste Summary**\n..."
+  "audit_report": "## Laporan Audit Sampah\n\n**1. Ringkasan Sampah**\n..."
 }
 ```
 
-**Error codes**
+**Kode error**
 
-| Status | Cause |
+| Status | Penyebab |
 |---|---|
-| `400` | Empty file uploaded |
-| `413` | File exceeds 20 MB |
-| `415` | Unsupported file type or extension |
-| `503` | Ollama Cloud unreachable or API key invalid |
-| `500` | YOLO inference error or unexpected server fault |
+| `400` | File yang diunggah kosong |
+| `413` | Ukuran file melebihi 20 MB |
+| `415` | Tipe atau ekstensi file tidak didukung |
+| `503` | Ollama Cloud tidak dapat dijangkau atau API key tidak valid |
+| `500` | Error inferensi YOLO atau kesalahan server yang tidak terduga |
 
 ---
 
-## Configuration
+## Konfigurasi
 
-| Setting | Default | How to change |
+| Pengaturan | Default | Cara Mengubah |
 |---|---|---|
-| Model path | `../model/best.pt` | Edit `MODEL_PATH` in `services/detector.py` |
-| Ollama model | `gpt-oss:120b` | Edit `OLLAMA_MODEL` in `services/ollama_service.py` |
-| Ollama host | `https://ollama.com` | Edit `OLLAMA_CLOUD_HOST` in `services/ollama_service.py` |
-| Upload dir | `backend/uploads/` | Edit `UPLOAD_DIR` in `main.py` |
-| Max file size | 20 MB | Edit `MAX_FILE_SIZE_BYTES` in `main.py` |
-| CORS origin | `http://localhost:3000` | Edit `allow_origins` in `main.py` |
-| Server port | `8000` | Pass `--port N` to uvicorn |
+| Path model | `../model/best.pt` | Edit `MODEL_PATH` di `services/detector.py` |
+| Model Ollama | `gpt-oss:120b` | Edit `OLLAMA_MODEL` di `services/ollama_service.py` |
+| Host Ollama | `https://ollama.com` | Edit `OLLAMA_CLOUD_HOST` di `services/ollama_service.py` |
+| Direktori upload | `backend/uploads/` | Edit `UPLOAD_DIR` di `main.py` |
+| Ukuran file maksimum | 20 MB | Edit `MAX_FILE_SIZE_BYTES` di `main.py` |
+| Origin CORS | `http://localhost:3000` | Edit `allow_origins` di `main.py` |
+| Port server | `8000` | Tambahkan `--port N` saat menjalankan uvicorn |
 
 ---
 
-## Deployment (Vercel)
+## Deployment ke Vercel
 
-This project is configured for Vercel monorepo deployment via `vercel.json`. The frontend and backend are deployed as separate services from the same repository.
+Proyek ini dikonfigurasi untuk deployment monorepo Vercel melalui `vercel.json`. Frontend dan backend di-deploy sebagai layanan terpisah dari repositori yang sama.
 
 ```json
 {
@@ -305,21 +305,21 @@ This project is configured for Vercel monorepo deployment via `vercel.json`. The
 }
 ```
 
-Set `OLLAMA_API_KEY` in your Vercel project environment variables before deploying.
+Pastikan variabel `OLLAMA_API_KEY` sudah diatur di pengaturan environment Vercel sebelum melakukan deployment.
 
 ---
 
-## Notes
+## Catatan Penting
 
-- Uploaded images are automatically deleted after each request — nothing is persisted.
-- The YOLOv8 model (`best.pt`) is loaded once at startup, resulting in zero overhead per request.
-- GPU is used automatically when CUDA is available; falls back to CPU otherwise.
-- The `/audit` endpoint returns HTTP `503` (not `500`) when Ollama is unavailable, allowing the frontend to handle LLM outages gracefully.
-- The `/detect` endpoint remains fully functional without an Ollama API key.
-- The `OLLAMA_API_KEY` in `.env` is excluded from version control via `.gitignore`.
+- Gambar yang diunggah dihapus otomatis setelah setiap request — tidak ada data yang disimpan permanen.
+- Model YOLOv8 (`best.pt`) dimuat sekali saat startup, sehingga tidak ada overhead tambahan per request.
+- GPU digunakan secara otomatis jika CUDA tersedia; jika tidak, sistem akan menggunakan CPU.
+- Endpoint `/audit` mengembalikan HTTP `503` (bukan `500`) saat Ollama tidak tersedia, sehingga frontend dapat menangani gangguan LLM tanpa menyembunyikan hasil deteksi YOLO.
+- Endpoint `/detect` tetap berfungsi penuh meskipun tanpa Ollama API key.
+- File `OLLAMA_API_KEY` di `.env` sudah dikecualikan dari version control melalui `.gitignore`.
 
 ---
 
-## License
+## Lisensi
 
 MIT

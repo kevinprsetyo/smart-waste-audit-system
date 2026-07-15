@@ -23,7 +23,7 @@ backend/
 └── best.pt                     # Custom-trained YOLOv8 model (required)
 ```
 
----
+----
 
 ## Prerequisites
 
